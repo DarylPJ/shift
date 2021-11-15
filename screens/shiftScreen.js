@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Text, View, StyleSheet, Button } from "react-native";
+import GestureRecognizer from "react-native-swipe-gestures";
 
 const zeroDays = {
   blue: new Date(2021, 10, 1).getTime(),
@@ -182,7 +183,11 @@ export default class ShiftScreen extends Component {
     ));
 
     return (
-      <View style={styles.container}>
+      <GestureRecognizer
+        style={styles.container}
+        onSwipeLeft={this.onNextClick.bind(this)}
+        onSwipeRight={this.onPreviousClick.bind(this)}
+      >
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
             <Button
@@ -205,7 +210,7 @@ export default class ShiftScreen extends Component {
           this.state.date.getFullYear(),
           this.state.date.getMonth()
         )}
-      </View>
+      </GestureRecognizer>
     );
   }
 }
