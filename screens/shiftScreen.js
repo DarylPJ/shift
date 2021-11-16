@@ -8,6 +8,9 @@ import {
   BackHandler,
 } from "react-native";
 import GestureRecognizer from "react-native-swipe-gestures";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const settingsKey = "shiftSettings";
 
 const zeroDays = {
   blue: new Date(2021, 10, 1).getTime(),
@@ -47,8 +50,9 @@ export default class ShiftScreen extends Component {
 
     this.state = {
       date: new Date(),
-      shifttoggles,
       editSettings: false,
+      loading: true,
+      shifttoggles,
     };
   }
 
@@ -57,6 +61,8 @@ export default class ShiftScreen extends Component {
       "hardwareBackPress",
       this.onBackPress.bind(this)
     );
+
+    this.readSettings();
   }
 
   componentWillUnmount() {
@@ -64,6 +70,32 @@ export default class ShiftScreen extends Component {
       "hardwareBackPress",
       this.onBackPress.bind(this)
     );
+  }
+
+  async storeSettings() {
+    try {
+      await AsyncStorage.setItem(
+        "settingsKey",
+        JSON.stringify(this.state.shifttoggles)
+      );
+    } catch (e) {
+      // saving error
+    }
+  }
+
+  async readSettings() {
+    try {
+      const value = await AsyncStorage.getItem("settingsKey");
+
+      let shifttoggles = this.state.shifttoggles;
+      if (value !== null) {
+        shifttoggles = JSON.parse(value);
+      }
+
+      this.setState({ ...this.state, shifttoggles, loading: false });
+    } catch (e) {
+      // error reading value
+    }
   }
 
   shiftValue(date, zeroDate) {
@@ -122,11 +154,13 @@ export default class ShiftScreen extends Component {
     this.setState({ ...this.state, editSettings: true });
   }
 
-  toggleValue(shift) {
+  async toggleValue(shift) {
     const toggle = this.state.shifttoggles.find((i) => i.shift === shift);
     toggle.enabled = !toggle.enabled;
 
     this.setState({ ...this.state });
+
+    await this.storeSettings();
   }
 
   renderShifts(year, month, day) {
@@ -233,11 +267,14 @@ export default class ShiftScreen extends Component {
         .length === 1;
 
     const settings = this.state.shifttoggles.map((shiftToggle, index) => (
-      <View style={[styles.row, { alignItems: "center" }]}>
+      <View
+        key={`${index} view1`}
+        style={[styles.row, { alignItems: "center" }]}
+      >
         <Text key={index} style={styles.text}>
           {shiftToggle.shift}
         </Text>
-        <View>
+        <View key={`${index} view2`}>
           <Switch
             trackColor={{ false: "#767577", true: "#767577" }}
             key={`${index} switch`}
@@ -257,6 +294,10 @@ export default class ShiftScreen extends Component {
   }
 
   render() {
+    if (this.state.loading) {
+      return null;
+    }
+
     if (this.state.editSettings) {
       return this.renderSettings();
     }
