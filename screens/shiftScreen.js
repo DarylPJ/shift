@@ -1,5 +1,12 @@
 import React, { Component } from "react";
-import { Text, View, StyleSheet, Button } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  Button,
+  Switch,
+  BackHandler,
+} from "react-native";
 import GestureRecognizer from "react-native-swipe-gestures";
 
 const zeroDays = {
@@ -10,7 +17,7 @@ const zeroDays = {
   yellow: new Date(2021, 8, 20).getTime(),
 };
 
-const daysOfTheWeek = ["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"];
+const daysOfTheWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const monthNames = [
   "January",
@@ -27,11 +34,37 @@ const monthNames = [
   "December",
 ];
 
+const allShifts = ["blue", "green", "red", "purple", "yellow"];
+
 export default class ShiftScreen extends Component {
-  state = {
-    date: new Date(),
-    shifts: ["blue", "green", "red", "purple", "yellow"],
-  };
+  constructor() {
+    super();
+
+    const shifttoggles = allShifts.map((shift) => ({
+      shift,
+      enabled: true,
+    }));
+
+    this.state = {
+      date: new Date(),
+      shifttoggles,
+      editSettings: false,
+    };
+  }
+
+  componentDidMount() {
+    BackHandler.addEventListener(
+      "hardwareBackPress",
+      this.onBackPress.bind(this)
+    );
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener(
+      "hardwareBackPress",
+      this.onBackPress.bind(this)
+    );
+  }
 
   shiftValue(date, zeroDate) {
     const diff = date.getTime() - zeroDate;
@@ -57,6 +90,15 @@ export default class ShiftScreen extends Component {
     return "";
   }
 
+  onBackPress() {
+    if (!this.state.editSettings) {
+      return false;
+    }
+
+    this.setState({ ...this.state, editSettings: false });
+    return true;
+  }
+
   onPreviousClick() {
     const workingDate = new Date(this.state.date);
     const newDate = new Date(workingDate.setMonth(workingDate.getMonth() - 1));
@@ -76,12 +118,25 @@ export default class ShiftScreen extends Component {
     this.setState({ ...this.state, date: newDate });
   }
 
+  onSettingsClick() {
+    this.setState({ ...this.state, editSettings: true });
+  }
+
+  toggleValue(shift) {
+    const toggle = this.state.shifttoggles.find((i) => i.shift === shift);
+    toggle.enabled = !toggle.enabled;
+
+    this.setState({ ...this.state });
+  }
+
   renderShifts(year, month, day) {
     const result = [];
 
     let shiftValues = [];
 
-    for (const shift of this.state.shifts) {
+    for (const shiftToggle of this.state.shifttoggles) {
+      const shift = shiftToggle.shift;
+
       const value = this.shiftValue(
         new Date(year, month, day),
         zeroDays[shift]
@@ -168,7 +223,40 @@ export default class ShiftScreen extends Component {
     return results;
   }
 
+  renderSettings() {
+    const oneEnabled =
+      this.state.shifttoggles.filter((shiftToggle) => shiftToggle.enabled)
+        .length === 1;
+
+    const settings = this.state.shifttoggles.map((shiftToggle, index) => (
+      <View style={[styles.row, { alignItems: "center" }]}>
+        <Text key={index} style={styles.text}>
+          {shiftToggle.shift}
+        </Text>
+        <View>
+          <Switch
+            trackColor={{ false: "#767577", true: "#767577" }}
+            key={`${index} switch`}
+            value={shiftToggle.enabled}
+            onChange={this.toggleValue.bind(this, shiftToggle.shift)}
+            disabled={oneEnabled && shiftToggle.enabled}
+          ></Switch>
+        </View>
+      </View>
+    ));
+
+    return (
+      <View style={[styles.container, { paddingLeft: 20 }]}>
+        <View style={{ flex: 0.5 }}>{settings}</View>
+      </View>
+    );
+  }
+
   render() {
+    if (this.state.editSettings) {
+      return this.renderSettings();
+    }
+
     const workingDate = new Date(this.state.date);
     const PrevDate = new Date(workingDate.setMonth(workingDate.getMonth() - 1));
 
@@ -190,19 +278,34 @@ export default class ShiftScreen extends Component {
       >
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
-            <Button
-              disabled={disablePrev}
-              title="Previous"
-              onPress={this.onPreviousClick.bind(this)}
-            ></Button>
-          </View>
-          <Text style={[styles.text, { flex: 1 }]}>
-            {`${
-              monthNames[this.state.date.getMonth()]
-            } ${this.state.date.getFullYear()}`}
-          </Text>
-          <View style={{ flex: 1 }}>
-            <Button title="Next" onPress={this.onNextClick.bind(this)}></Button>
+            <View style={styles.row}>
+              <View style={{ flex: 1, padding: 5 }}>
+                <Button
+                  disabled={disablePrev}
+                  title="Previous"
+                  onPress={this.onPreviousClick.bind(this)}
+                ></Button>
+              </View>
+              <View style={{ flex: 1, padding: 5 }}>
+                <Button
+                  title="Next"
+                  onPress={this.onNextClick.bind(this)}
+                ></Button>
+              </View>
+              <View style={{ flex: 1, padding: 5 }}>
+                <Button
+                  title="Settings"
+                  onPress={this.onSettingsClick.bind(this)}
+                ></Button>
+              </View>
+            </View>
+            <View style={styles.row}>
+              <Text style={[styles.text, { flex: 1, padding: 5 }]}>
+                {`${
+                  monthNames[this.state.date.getMonth()]
+                } ${this.state.date.getFullYear()}`}
+              </Text>
+            </View>
           </View>
         </View>
         <View style={styles.row}>{days}</View>
@@ -218,6 +321,7 @@ export default class ShiftScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     paddingTop: 40,
+    paddingBottom: 10,
     backgroundColor: "black",
     flex: 1,
   },
