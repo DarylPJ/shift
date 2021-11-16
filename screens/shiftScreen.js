@@ -135,6 +135,10 @@ export default class ShiftScreen extends Component {
     let shiftValues = [];
 
     for (const shiftToggle of this.state.shifttoggles) {
+      if (!shiftToggle.enabled) {
+        continue;
+      }
+
       const shift = shiftToggle.shift;
 
       const value = this.shiftValue(
@@ -154,18 +158,18 @@ export default class ShiftScreen extends Component {
       shiftValues.find((i) => i.value === "N"),
     ];
 
+    const onlyOne =
+      this.state.shifttoggles.filter((i) => i.enabled).length === 1;
     for (const shiftValue of shiftValues) {
       if (!shiftValue) {
         continue;
       }
 
       const key = `${day} ${shiftValue.shift}`;
+      const style = onlyOne ? {} : { color: shiftValue.shift };
 
       result.push(
-        <Text
-          key={key}
-          style={[styles.text, styles.shift, { color: shiftValue.shift }]}
-        >
+        <Text key={key} style={[styles.text, styles.shift, style]}>
           {shiftValue.value}
         </Text>
       );
@@ -201,7 +205,7 @@ export default class ShiftScreen extends Component {
         week.push(
           <View key={`${row} ${dayOfTheWeek} 1`} style={styles.box}>
             <Text style={styles.text} key={`${row} ${dayOfTheWeek} 2`}>
-              {day}:
+              {day}
             </Text>
             <View
               key={`${row} ${dayOfTheWeek} 3`}
@@ -344,5 +348,6 @@ const styles = StyleSheet.create({
   shift: {
     paddingLeft: 5,
     paddingRight: 5,
+    paddingTop: 10,
   },
 });
