@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "shift",
-    "slug": "shift",
+    "name": "Shift",
+    "slug": "Shift",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,14 +20,13 @@
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      }
+      "permissions": [],
+      "package": "com.daryljones.shift",
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "description": ""
+    "description": "shift pattern app"
   }
 }

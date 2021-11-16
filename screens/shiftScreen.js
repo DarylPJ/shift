@@ -324,20 +324,20 @@ export default class ShiftScreen extends Component {
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
             <View style={styles.row}>
-              <View style={{ flex: 1, padding: 5 }}>
+              <View style={{ flex: 1, paddingLeft: 2.5, paddingRight: 2.5 }}>
                 <Button
                   disabled={disablePrev}
                   title="Previous"
                   onPress={this.onPreviousClick.bind(this)}
                 ></Button>
               </View>
-              <View style={{ flex: 1, padding: 5 }}>
+              <View style={{ flex: 1, paddingLeft: 2.5, paddingRight: 2.5 }}>
                 <Button
                   title="Next"
                   onPress={this.onNextClick.bind(this)}
                 ></Button>
               </View>
-              <View style={{ flex: 1, padding: 5 }}>
+              <View style={{ flex: 1, paddingLeft: 2.5, paddingRight: 2.5 }}>
                 <Button
                   title="Settings"
                   onPress={this.onSettingsClick.bind(this)}
