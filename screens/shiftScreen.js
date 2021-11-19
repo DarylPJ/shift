@@ -192,18 +192,18 @@ export default class ShiftScreen extends Component {
       shiftValues.find((i) => i.value === "N"),
     ];
 
-    const onlyOne =
-      this.state.shifttoggles.filter((i) => i.enabled).length === 1;
     for (const shiftValue of shiftValues) {
       if (!shiftValue) {
         continue;
       }
 
       const key = `${day} ${shiftValue.shift}`;
-      const style = onlyOne ? {} : { color: shiftValue.shift };
 
       result.push(
-        <Text key={key} style={[styles.text, styles.shift, style]}>
+        <Text
+          key={key}
+          style={[styles.text, styles.shift, { color: shiftValue.shift }]}
+        >
           {shiftValue.value}
         </Text>
       );
